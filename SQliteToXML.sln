@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29409.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQliteToXML", "SQliteToXML\SQliteToXML.csproj", "{8572ED8C-4794-47A1-9A3A-CBC8C02A944E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8572ED8C-4794-47A1-9A3A-CBC8C02A944E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8572ED8C-4794-47A1-9A3A-CBC8C02A944E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8572ED8C-4794-47A1-9A3A-CBC8C02A944E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8572ED8C-4794-47A1-9A3A-CBC8C02A944E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF7942C9-E571-464F-8189-26FC231FBBDF}
+	EndGlobalSection
+EndGlobal
