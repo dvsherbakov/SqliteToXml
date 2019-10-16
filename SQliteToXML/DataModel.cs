@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Dapper;
@@ -12,9 +13,12 @@ namespace SQliteToXML
     {
         string ConnectionString { get; set; }
         List<LocalDataTable> Tables { get; set; }
+        DataSet ds { get; set; }
+
         public DataModel(string fileName)
         {
             ConnectionString = $"Data Source=.\\{fileName};Version=3;";
+            ds = new DataSet();
         }
 
         public SQLiteConnection CreateConnection()
@@ -31,6 +35,10 @@ namespace SQliteToXML
                 {
                     GetTableFields(tab.name);
                 }
+                using (StreamWriter sr = new StreamWriter(Path.Combine("C:\\Temp", "tables.xml")))
+                {
+                    ds.WriteXml(sr);
+                }
             }
         }
 
@@ -43,27 +51,18 @@ namespace SQliteToXML
                 cnn.Open();
                 SQLiteCommand cmd = new SQLiteCommand($"select * from {tableName}", cnn);
                 SQLiteDataReader dataReader = cmd.ExecuteReader();
-                
-                while (dataReader.Read())
+
+                if (dataReader.HasRows)
                 {
-                    var vls = dataReader.GetValues();
-                    foreach (string st in vls)
+                    DataTable dt = new DataTable();
+                    dt.Load(dataReader);
+                    ds.Tables.Add(dt);
+                    using (StreamWriter fs = new StreamWriter(Path.Combine("C:\\Temp", tableName + ".xml"))) // XML File Path
                     {
-                        var tp = dataReader[st].GetType();
-                        Console.WriteLine(dataReader[st]);
-                        switch (tp.Name)
-                        {
-                            case "String" :
-                                //var xc = dataReader[st].ToString();
-                                //var xt = dataReader[xc];
-                                //Console.WriteLine(dataReader[st]);
-                                break;
-                        }
+                        dt.WriteXml(fs);
                     }
-                   
                 }
                 cnn.Close();
-
             }
         }
 
