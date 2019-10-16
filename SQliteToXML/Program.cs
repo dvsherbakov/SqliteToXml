@@ -6,7 +6,7 @@ namespace SQliteToXML
     {
         static void Main(string[] args)
         {
-            var dm = new DataModel("projects.db");
+            var dm = new DataModel("template.db");
             dm.GetTables();
         }
     }
