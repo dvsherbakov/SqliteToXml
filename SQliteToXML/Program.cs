@@ -8,6 +8,8 @@ namespace SQliteToXML
         {
             var dm = new DataModel("template.db");
             dm.GetTables();
+            dm.SaveXml(@"C:\Temp\template.xml");
+            //Console.ReadKey();
         }
     }
 }

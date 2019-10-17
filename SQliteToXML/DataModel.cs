@@ -5,6 +5,8 @@ using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Xml;
+using System.Xml.Linq;
 using Dapper;
 
 namespace SQliteToXML
@@ -13,12 +15,16 @@ namespace SQliteToXML
     {
         string ConnectionString { get; set; }
         List<LocalDataTable> Tables { get; set; }
-        DataSet ds { get; set; }
+        XDocument XDoc { get; set; }
+        XElement Database { get; set; }
 
         public DataModel(string fileName)
         {
             ConnectionString = $"Data Source=.\\{fileName};Version=3;";
-            ds = new DataSet();
+            XDoc = new XDocument();
+            
+            Database = new XElement("DataBase");
+            XDoc.Add(Database);
         }
 
         public SQLiteConnection CreateConnection()
@@ -35,10 +41,7 @@ namespace SQliteToXML
                 {
                     GetTableFields(tab.name);
                 }
-                using (StreamWriter sr = new StreamWriter(Path.Combine("C:\\Temp", "tables.xml")))
-                {
-                    ds.WriteXml(sr);
-                }
+                
             }
         }
 
@@ -54,18 +57,35 @@ namespace SQliteToXML
 
                 if (dataReader.HasRows)
                 {
-                    DataTable dt = new DataTable();
-                    dt.Load(dataReader);
-                    ds.Tables.Add(dt);
-                    using (StreamWriter fs = new StreamWriter(Path.Combine("C:\\Temp", tableName + ".xml"))) // XML File Path
+                    var TableElement = new XElement(tableName);
+
+                    var columns = new List<string>();
+                    for (int i = 0; i < dataReader.FieldCount; i++)
                     {
-                        dt.WriteXml(fs);
+                        columns.Add(dataReader.GetName(i));
                     }
+
+                    while (dataReader.Read())
+                    {
+                        var Row = new XElement("Row");
+                        
+                        foreach( string col in columns)
+                        {
+                            Row.Add(new XAttribute(col, dataReader[col].ToString()));
+                        }
+                        TableElement.Add(Row);
+                    }
+                    Database.Add(TableElement);
+
                 }
                 cnn.Close();
             }
         }
 
+        public void SaveXml(string fileName)
+        {
+            XDoc.Save(fileName);
+        }
 
     }
 
