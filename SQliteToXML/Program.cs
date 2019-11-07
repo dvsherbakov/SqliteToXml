@@ -2,14 +2,14 @@
 
 namespace SQliteToXML
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var dm = new DataModel("template.db");
             dm.GetTables();
             dm.SaveXml(@"C:\Temp\template.xml");
-            //Console.ReadKey();
+            Console.ReadKey();
         }
     }
 }

@@ -2,32 +2,30 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SQLite;
-using System.IO;
 using System.Linq;
-using System.Text;
-using System.Xml;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Dapper;
 
 namespace SQliteToXML
 {
-    class DataModel
+    internal class DataModel
     {
-        string ConnectionString { get; set; }
-        List<LocalDataTable> Tables { get; set; }
-        XDocument XDoc { get; set; }
-        XElement Database { get; set; }
+        private string ConnectionString { get; set; }
+        private List<LocalDataTable> Tables { get; set; }
+        private XDocument XDoc { get; set; }
+        private XElement Database { get; set; }
 
         public DataModel(string fileName)
         {
             ConnectionString = $"Data Source=.\\{fileName};Version=3;";
             XDoc = new XDocument();
-            
+
             Database = new XElement("DataBase");
             XDoc.Add(Database);
         }
 
-        public SQLiteConnection CreateConnection()
+        private SQLiteConnection CreateConnection()
         {
             return new SQLiteConnection(ConnectionString);
         }
@@ -36,48 +34,52 @@ namespace SQliteToXML
         {
             using (IDbConnection cnn = CreateConnection())
             {
-                Tables = cnn.Query<LocalDataTable>("SELECT * FROM sqlite_master WHERE type = 'table' ORDER BY 1", new DynamicParameters()).ToList();
+                Tables = cnn.Query<LocalDataTable>("SELECT * FROM sqlite_master WHERE type = 'table' ORDER BY 1",
+                    new DynamicParameters()).ToList();
                 foreach (var tab in Tables)
                 {
-                    GetTableFields(tab.name);
+                    GetTableFields(tab.Name);
                 }
-                
+
             }
         }
 
-        public void GetTableFields(string tableName)
+        private void GetTableFields(string tableName)
         {
-            using (SQLiteConnection cnn = new SQLiteConnection(ConnectionString))
+            Example(tableName);
+            
+            using (var cnn = new SQLiteConnection(ConnectionString))
             {
-                //var outp = cnn.Query<DataField>($"PRAGMA table_info({tableName})", new DynamicParameters()).ToList();
-
                 cnn.Open();
-                SQLiteCommand cmd = new SQLiteCommand($"select * from {tableName}", cnn);
-                SQLiteDataReader dataReader = cmd.ExecuteReader();
+                var cmd = new SQLiteCommand($"select * from {tableName}", cnn);
+                var dataReader = cmd.ExecuteReader();
 
                 if (dataReader.HasRows)
                 {
-                    var TableElement = new XElement(tableName);
+                    var tableElement = new XElement(tableName);
 
                     var columns = new List<string>();
-                    for (int i = 0; i < dataReader.FieldCount; i++)
+                    for (var i = 0; i < dataReader.FieldCount; i++)
                     {
                         columns.Add(dataReader.GetName(i));
                     }
 
                     while (dataReader.Read())
                     {
-                        var Row = new XElement("Row");
-                        
-                        foreach( string col in columns)
-                        {
-                            Row.Add(new XAttribute(col, dataReader[col].ToString()));
-                        }
-                        TableElement.Add(Row);
-                    }
-                    Database.Add(TableElement);
+                        var row = new XElement("Row");
 
+                        foreach (var col in columns)
+                        {
+                            row.Add(new XAttribute(col, dataReader[col].ToString()));
+                        }
+
+                        tableElement.Add(row);
+                    }
+
+                    Database.Add(tableElement);
+                    Console.WriteLine($"Added table {tableName}");
                 }
+
                 cnn.Close();
             }
         }
@@ -87,16 +89,32 @@ namespace SQliteToXML
             XDoc.Save(fileName);
         }
 
+       
+        private static async void Example(string tableName)
+        {
+            var t = await Task.Run(Allocate);
+            Console.WriteLine($"{tableName}: {t}");
+        }
+
+        private static int Allocate()
+        {
+            // Compute total count of digits in strings.
+            var size = 0;
+            for (var z = 0; z < 1000; z++)
+            {
+                for (var i = 0; i < 1000; i++)
+                {
+                    var value = i.ToString();
+                    size += value.Length;
+                }
+            }
+            return size;
+        }
+
     }
 
-    class LocalDataTable
+    internal class LocalDataTable
     {
-        public string name { get; set; }
-    }
-
-    class DataField
-    {
-        public string name { get; set; }
-        public string type { get; set; }
+        public string Name { get; set; }
     }
 }
